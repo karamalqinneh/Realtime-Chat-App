@@ -7,9 +7,21 @@ const io = require("socket.io")(3000, {
 
 const userIo = io.of("/user");
 
-userIo.on("connection", (socket) => {
-  console.log("CONNECTED TO USER NAMESPACE", socket.id);
+userIo.use((socket, next) => {
+  if (socket.handshake.auth.token) {
+    socket.username = getUsernameFromToken(socket.handshake.auth.token);
+    next();
+  } else {
+    next(new Error("please send a token"));
+  }
 });
+userIo.on("connection", (socket) => {
+  console.log("CONNECTED TO USER NAMESPACE", socket.username);
+});
+
+function getUsernameFromToken(token) {
+  return token;
+}
 
 io.on("connection", (socket) => {
   console.log("CONNECTED", socket.id);
@@ -25,6 +37,8 @@ io.on("connection", (socket) => {
     socket.join(room);
     cb(`joined room: ${room}`);
   });
+
+  socket.on("ping", (n) => console.log(n));
 });
 
 instrument(io, { auth: false });
