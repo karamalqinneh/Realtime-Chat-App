@@ -51,3 +51,5 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "c") socket.connect();
   if (e.key === "d") socket.disconnect();
 });
+
+console.log(process.argv);
